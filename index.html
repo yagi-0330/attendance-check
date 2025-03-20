@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>出席確認</title>
+    <script src="https://static.line-scdn.net/liff/edge/versions/2.15.0/sdk.js"></script>
+</head>
+<body>
+    <h1>出席確認</h1>
+    <p id="user-name">ログイン中...</p>
+    <button onclick="markAttendance('出席')">✅ 出席</button>
+    <button onclick="markAttendance('欠席')">❌ 欠席</button>
+    <p id="status"></p>
+
+    <script>
+        async function initializeLiff() {
+            await liff.init({ liffId: "YOUR_LIFF_ID" }); // LIFF IDを設定
+            if (!liff.isLoggedIn()) {
+                liff.login();
+            } else {
+                const profile = await liff.getProfile();
+                document.getElementById("user-name").innerText = `こんにちは、${profile.displayName} さん！`;
+            }
+        }
+
+        async function markAttendance(status) {
+            const profile = await liff.getProfile();
+            const userId = profile.userId;
+            const userName = profile.displayName;
+
+            const response = await fetch("YOUR_GAS_WEBHOOK_URL", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId, userName, status })
+            });
+
+            document.getElementById("status").innerText = `出席状況: ${status} を記録しました！`;
+        }
+
+        initializeLiff();
+    </script>
+</body>
+</html>
